@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 
 import csv
+import os.path
+import numpy as np
+
+from scipy.ndimage import imread
+
+
+DATA_LOCATION = os.path.join('data','download')
 
 class Movie():
 
@@ -25,12 +32,19 @@ class Movie():
         self.score = csvline[3]
         self.genres = csvline[4].split('|')
         self.poster_link = csvline[5]
+        
+        self.catvec = -1
+        self.matrix = -1
 
 
 class MovieContainer():
 
     def __init__(self):
         self.movies = dict()
+        self.x_train = -1
+        self.x_test = -1
+        self.y_train = -1
+        self.y_test = -1
 
     def add_csv_file(self, csvfile):
         with open(csvfile) as f:
@@ -57,5 +71,44 @@ class MovieContainer():
         for key in self.movies.keys():
             if len(self.movies[key].poster_link) < 4:
                 removekeys.append(key)
+
         for key in removekeys:
             del self.movies[key]
+
+    def remove_movies_without_posters(self):
+        removekeys = []
+        for key in self.movies.keys():
+            filename = str(key) + '.jpg'
+            if not os.path.isfile(os.path.join(DATA_LOCATION,filename)):
+                removekeys.append(key)
+
+        for key in removekeys:
+            del self.movies[key]
+
+    def create_cat_vecs(self):
+        catlist = []
+        for key in self.movies.keys():
+            for cat in self.movies[key].genres:
+                if cat not in catlist:
+                    catlist.append(cat)
+
+        catlist.sort()
+
+        for key in self.movies.keys():
+            self.movies[key].catvec = np.zeros(len(catlist))
+
+            for cat in self.movies[key].genres:
+                 self.movies[key].catvec[catlist.index(cat)] = 1
+
+    def load_images_into_mem(self):
+        for key in self.movies.keys():
+            filename = str(key) + '.jpg'
+            self.movies[key].matrix = imread(os.path.join(DATA_LOCATION, filename))
+            
+
+    def create_data_arrays(self):
+
+
+
+
+
