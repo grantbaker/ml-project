@@ -4,8 +4,8 @@ import csv
 import os.path
 import numpy as np
 
-from scipy.ndimage import imread
-
+from scipy.misc import imread
+from random import shuffle
 
 DATA_LOCATION = os.path.join('data','download')
 
@@ -41,6 +41,9 @@ class MovieContainer():
 
     def __init__(self):
         self.movies = dict()
+
+        self.images_loaded = False
+
         self.x_train = -1
         self.x_test = -1
         self.y_train = -1
@@ -54,11 +57,11 @@ class MovieContainer():
             for row in csv_reader:
                 if num_rows == -1:
                     num_rows += 1
-                    print(num_rows)
+                    #print(num_rows)
                     continue
                 else:
                     num_rows += 1
-                    print(num_rows)
+                    #print(num_rows)
                     try:
                         key = int(row[0])
                         if key not in self.movies.keys():
@@ -103,10 +106,78 @@ class MovieContainer():
     def load_images_into_mem(self):
         for key in self.movies.keys():
             filename = str(key) + '.jpg'
-            self.movies[key].matrix = imread(os.path.join(DATA_LOCATION, filename))
+            self.movies[key].matrix = imread(os.path.join(DATA_LOCATION, filename), mode='RGB')
             
+        self.images_loaded = True
 
-    def create_data_arrays(self):
+    def remove_images_from_mem(self):
+        for key in self.movies.keys():
+            self.movies[key].matrix = -1
+
+        self.images_loaded = False
+
+    def remove_bw_images(self):
+        # TODO: Finish this
+        removekeys = []
+        for key in self.movies.keys():
+            filename = str(key) + '.jpg'
+            im = imread(os.path.join(DATA_LOCATION, filename))
+
+    def remove_different_size_images(self):
+        shapes = dict()
+        for key in self.movies.keys():
+            filename = str(key) + '.jpg'
+            im = imread(os.path.join(DATA_LOCATION, filename), mode='RGB')
+            sh = im.shape
+            if sh not in shapes.keys():
+                shapes[sh] = []
+            shapes[sh].append(key)
+
+        max_shape = max(shapes, key= lambda x: len(set(shapes[x])))
+        
+        num_deleted = 0
+        for sh in [shape for shape in shapes.keys() if shape != max_shape]:
+            for key in shapes[sh]:
+                del self.movies[key]
+                num_deleted += 1
+        print('Deleted: ', num_deleted)
+
+    def create_data_arrays(self,test_proportion=0.5):
+        key_list = list(self.movies.keys())
+        shuffle(key_list)
+        split_i = int(len(key_list)*test_proportion)
+        test_list = key_list[0:split_i]
+        train_list = key_list[split_i:]
+        
+        #print(test_list, train_list)
+
+        im_size = imread(os.path.join(DATA_LOCATION, str(test_list[0]) + '.jpg')).shape
+
+        self.x_test = np.zeros((len(test_list), im_size[0], im_size[1], im_size[2]), dtype=np.int8)
+        self.y_test = np.zeros((len(test_list), self.movies[test_list[0]].catvec.shape[0]), dtype=np.int8)
+        i = 0
+        for key in test_list:
+            if self.images_loaded:
+                self.x_test[i] = self.movies[key].matrix
+            else:
+                filename = str(key) + '.jpg'
+                self.x_test[i] = imread(os.path.join(DATA_LOCATION, filename), mode='RGB')
+            self.y_test[i] = self.movies[key].catvec
+            i += 1
+
+        self.x_train = np.zeros((len(train_list), im_size[0], im_size[1], im_size[2]), dtype=np.int8)
+        self.y_train = np.zeros((len(train_list), self.movies[train_list[0]].catvec.shape[0]), dtype=np.int8)
+        i = 0
+        for key in train_list:
+            if self.images_loaded:
+                self.x_train[i] = self.movies[key].matrix
+            else:
+                filename = str(key) + '.jpg'
+                self.x_train[i] = imread(os.path.join(DATA_LOCATION, filename), mode='RGB')
+            self.y_train[i] = self.movies[key].catvec
+            i += 1
+
+
 
 
 
