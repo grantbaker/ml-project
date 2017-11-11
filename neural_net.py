@@ -33,11 +33,9 @@ class CNN:
 
 
 
-        # # normalize data to range [0, 1]
-        # self.train_x /= 255
-        # self.test_x /= 255
-
-        # DONE: one hot encoding for train_y and test_y
+        # normalize data to range [0, 1]
+        self.train_x /= 255
+        self.test_x /= 255
 
         self.train_x = train_x
         self.test_x = test_x
@@ -53,7 +51,7 @@ class CNN:
         self.model.add(MaxPool2D(pool_size=(2, 2)))
         self.model.add(Conv2D(128, 3, strides=3, padding='same', activation=act))
         self.model.add(MaxPool2D(pool_size=(2, 2)))
-        self.model.add(Conv2D(256, 3, strides=3, padding='same', activation=act))
+        self.model.add(Conv2D(512, 3, strides=3, padding='same', activation=act))
         self.model.add(Flatten())
         self.model.add(Dropout(0.5))
         self.model.add(Dense(4096, activation=act))
@@ -61,7 +59,7 @@ class CNN:
         self.model.add(Dense(1024, activation=act))
         self.model.add(Dense(256, activation=act))
         #self.model.add(Dropout(0.3))
-        self.model.add(Dense(cats, activation='sigmoid'))
+        self.model.add(Dense(cats, activation='hard_sigmoid'))
 
         self.model.compile(loss=keras.losses.mean_squared_error,
               optimizer=keras.optimizers.Adadelta(),
@@ -107,7 +105,7 @@ if __name__ == '__main__':
     mc.create_data_arrays(test_proportion=0.2)
     print('created data arrays')
 
-    cnn = CNN(mc.x_train[:args.limit], mc.y_train[:args.limit], mc.x_test, mc.y_test, epochs=50, batch_size=128)
+    cnn = CNN(mc.x_train[:args.limit], mc.y_train[:args.limit], mc.x_test, mc.y_test, epochs=30, batch_size=200)
     cnn.train()
     acc = cnn.evaluate()
     print(acc)
