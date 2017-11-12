@@ -14,7 +14,29 @@ from keras.layers import Flatten
 from keras.layers import BatchNormalization
 from keras.layers.core import Reshape
 
+from keras import backend as K
+
 import movie
+import numpy as np
+
+def f_score(y_true, y_pred):
+    def recall(y_true, y_pred):
+        true_pos = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+        possible_pos = K.sum(K.round(K.clip(y_true, 0, 1)))
+        recall = true_pos / (possible_pos + K.epsilon())
+        return recall
+
+    def precision(y_true, y_pred):
+        true_pos = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+        predicted_pos = K.sum(K.round(K.clip(y_pred, 0, 1)))
+        precision = true_pos / (predicted_pos + K.epsilon())
+        return precision
+
+    beta = 1
+
+    precision = precision(y_true, y_pred)
+    recall = recall(y_true, y_pred)
+    return (1+beta**2)*((precision*recall)/((beta**2)*precision+recall))
 
 class CNN:
     '''
@@ -46,7 +68,8 @@ class CNN:
         # DONE: build you CNN model
         act='relu'
         self.model = Sequential()
-        self.model.add(Conv2D(64, 5, strides=5, padding='same', activation=act, input_shape=(268,182,3,)))
+        self.model.add(BatchNormalization(input_shape=(268,182,3,)))
+        self.model.add(Conv2D(64, 5, strides=5, padding='same', activation=act))
         #self.model.add(Conv2D(64, 3, strides=3, padding='same', activation=act))
         self.model.add(MaxPool2D(pool_size=(2, 2)))
         self.model.add(Conv2D(128, 3, strides=3, padding='same', activation=act))
@@ -55,7 +78,7 @@ class CNN:
         self.model.add(Flatten())
         self.model.add(Dropout(0.5))
         self.model.add(Dense(8192, activation=act))
-        self.model.add(BatchNormalization())
+        #self.model.add(BatchNormalization())
         self.model.add(Dense(1024, activation=act))
         #self.model.add(Dropout(0.5))
         self.model.add(Dense(128, activation=act))
@@ -63,7 +86,7 @@ class CNN:
 
         self.model.compile(loss=keras.losses.binary_crossentropy,
               optimizer=keras.optimizers.Adadelta(),
-              metrics=['accuracy'])
+              metrics=['accuracy', f_score])
 
     def train(self):
         '''
@@ -105,11 +128,12 @@ if __name__ == '__main__':
     mc.create_data_arrays(test_proportion=0.2)
     print('created data arrays')
 
-    cnn = CNN(mc.x_train[:args.limit], mc.y_train[:args.limit], mc.x_test, mc.y_test, epochs=10, batch_size=200)
+    cnn = CNN(mc.x_train[:args.limit], mc.y_train[:args.limit], mc.x_test, mc.y_test, epochs=50, batch_size=200)
     cnn.train()
     acc = cnn.evaluate()
     print(acc)
     
-    evals = cnn.model.predict(mc.x_test[:30],batch_size=30)
-    for i in range(30):
+    print_size = 5
+    evals = cnn.model.predict(mc.x_test[:print_size],batch_size=print_size)
+    for i in range(print_size):
         print(mc.y_test[i], ' | ', evals[i])
