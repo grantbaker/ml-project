@@ -33,9 +33,9 @@ class CNN:
 
 
 
-        # normalize data to range [0, 1]
-        self.train_x /= 255
-        self.test_x /= 255
+        # # normalize data to range [0, 1]
+        # train_x = train_x / 255
+        # test_x = test_x / 255
 
         self.train_x = train_x
         self.test_x = test_x
@@ -46,22 +46,22 @@ class CNN:
         # DONE: build you CNN model
         act='relu'
         self.model = Sequential()
-        self.model.add(Conv2D(64, 3, strides=3, padding='same', activation=act, input_shape=(268,182,3,)))
+        self.model.add(Conv2D(64, 5, strides=5, padding='same', activation=act, input_shape=(268,182,3,)))
         #self.model.add(Conv2D(64, 3, strides=3, padding='same', activation=act))
         self.model.add(MaxPool2D(pool_size=(2, 2)))
         self.model.add(Conv2D(128, 3, strides=3, padding='same', activation=act))
         self.model.add(MaxPool2D(pool_size=(2, 2)))
-        self.model.add(Conv2D(512, 3, strides=3, padding='same', activation=act))
+        self.model.add(Conv2D(256, 3, strides=3, padding='same', activation=act))
         self.model.add(Flatten())
         self.model.add(Dropout(0.5))
-        self.model.add(Dense(4096, activation=act))
-        # self.model.add(BatchNormalization())
+        self.model.add(Dense(8192, activation=act))
+        self.model.add(BatchNormalization())
         self.model.add(Dense(1024, activation=act))
-        self.model.add(Dense(256, activation=act))
-        #self.model.add(Dropout(0.3))
-        self.model.add(Dense(cats, activation='hard_sigmoid'))
+        #self.model.add(Dropout(0.5))
+        self.model.add(Dense(128, activation=act))
+        self.model.add(Dense(cats, activation='sigmoid'))
 
-        self.model.compile(loss=keras.losses.mean_squared_error,
+        self.model.compile(loss=keras.losses.binary_crossentropy,
               optimizer=keras.optimizers.Adadelta(),
               metrics=['accuracy'])
 
@@ -105,7 +105,11 @@ if __name__ == '__main__':
     mc.create_data_arrays(test_proportion=0.2)
     print('created data arrays')
 
-    cnn = CNN(mc.x_train[:args.limit], mc.y_train[:args.limit], mc.x_test, mc.y_test, epochs=30, batch_size=200)
+    cnn = CNN(mc.x_train[:args.limit], mc.y_train[:args.limit], mc.x_test, mc.y_test, epochs=10, batch_size=200)
     cnn.train()
     acc = cnn.evaluate()
     print(acc)
+    
+    evals = cnn.model.predict(mc.x_test[:30],batch_size=30)
+    for i in range(30):
+        print(mc.y_test[i], ' | ', evals[i])
