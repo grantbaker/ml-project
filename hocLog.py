@@ -45,7 +45,7 @@ class LOG:
 
     def __init__(self, train_x, train_y, test_x, test_y, epochs = 15, batch_size=128):
         '''
-        initialize CNN classifier
+        initialize CNN classifierest
         '''
         self.batch_size = batch_size
         self.epochs = epochs
@@ -99,7 +99,7 @@ if __name__ == '__main__':
     lis=HOC.HOCmovieList(CSVF)
     lis.GenData()
     print(np.shape(lis.y_train),np.shape(lis.y_test))
-    log = LOG(lis.x_train, lis.y_train, lis.x_test, lis.y_test, epochs=100, batch_size=200)
+    log = LOG(lis.x_train, lis.y_train, lis.x_test, lis.y_test, epochs=10000, batch_size=200)
     log.train()
     acc = log.evaluate()
     print(acc)
