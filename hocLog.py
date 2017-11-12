@@ -71,7 +71,7 @@ class LOG:
         self.model = Sequential()
         self.model.add(Dense(cats,input_shape=(96,),activation='sigmoid'))
 
-        self.model.compile(loss=keras.losses.mean_squared_error,
+        self.model.compile(loss=keras.losses.binary_crossentropy,
               optimizer=keras.optimizers.Adadelta(),
               metrics=['accuracy', f_score])
 
@@ -98,17 +98,17 @@ class LOG:
         return acc
 
 if __name__ == '__main__':
-    lis=HOC.HOCmovieList(CSVF)
-    lis.GenData()
-    f = open('store.pckl', 'wb')
-    pickle.dump(lis, f)
-    f.close()
+    #lis=HOC.HOCmovieList(CSVF)
+    #lis.GenData()
+    #f = open('store.pckl', 'wb')
+    #pickle.dump(lis, f)
+    #f.close()
 
     f = open('store.pckl', 'rb')
     lis = pickle.load(f)
     f.close()
     print(np.shape(lis.y_train),np.shape(lis.y_test))
-    log = LOG(lis.x_train, lis.y_train, lis.x_test, lis.y_test, epochs=500, batch_size=2048)
+    log = LOG(lis.x_train, lis.y_train, lis.x_test, lis.y_test, epochs=1000, batch_size=2048)
     log.train()
     acc = log.evaluate()
     print(acc)
