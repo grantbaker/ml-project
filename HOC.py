@@ -9,52 +9,7 @@ import os.path
 from random import shuffle
 
 DATA_LOCATION = os.path.join('data','download')
-
-'''ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--image", required = True, help = "Path to the image")
-args = vars(ap.parse_args())
-image = cv2.imread(args["image"])
-cv2.imshow("image", image)
-
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-cv2.imshow("gray", gray)
-hist = cv2.calcHist([gray], [0], None, [256], [0, 256])
-plt.figure()
-plt.title("Grayscale Histogram")
-plt.xlabel("Bins")
-plt.ylabel("# of Pixels")
-plt.plot(hist)
-plt.xlim([0, 256])
-
-chans = cv2.split(image)
-colors = ("b", "g", "r")
-plt.figure()
-plt.title("'Flattened' Color Histogram")
-plt.xlabel("Bins")
-plt.ylabel("# of Pixels")
-features = []
-
-# loop over the image channels
-i=0
-hoc=np.zeros((256,256))
-for (chan, color) in zip(chans, colors):
-    # create a histogram for the current channel and
-    # concatenate the resulting histograms for each
-    # channel
-    print(color)
-    hist = cv2.calcHist([chan], [0], None, [256], [0, 256])
-    features.extend(hist)
-
-    # plot the histogram
-    plt.plot(hist, color = color)
-    plt.xlim([0, 256])
-    print(np.size(hist))
-    hoc[:,i]=hist.reshape((256,1))
-    i=i+1
-print ("flattened feature vector size: ",  (np.array(features).flatten().shape))
-print(np.size(hoc))
-#plt.show()'''
-
+CSVF='data/MovieGenre (copy).csv'
 def getMovies(csvfile):
     with open(csvfile) as f:
             csv_reader = csv.reader(f, delimiter=',')
@@ -92,10 +47,11 @@ class HOCmovie():
         self.flhoc=self.hoc.flatten()
 
 mc = movie.MovieContainer()
-IDs,genres=getMovies('data/MovieGenre (copy).csv')
+IDs,genres=getMovies(CSVF)
 print(genres)
 print(np.shape(IDs))
 hocs=[]
+gens=[]
 for i in range(1,len(IDs)):
     gen=genres[i]
     id=IDs[i]
@@ -107,4 +63,5 @@ for i in range(1,len(IDs)):
         print(-1)
     if c==1:
         hocs.append(a.flhoc)
+        gens.append(a.gen)
 print(np.shape(hocs))
