@@ -48,8 +48,6 @@ class HOCmovie():
 
 mc = movie.MovieContainer()
 IDs,genres=getMovies(CSVF)
-print(genres)
-print(np.shape(IDs))
 hocs=[]
 gens=[]
 for i in range(1,len(IDs)):
@@ -65,3 +63,15 @@ for i in range(1,len(IDs)):
         hocs.append(a.flhoc)
         gens.append(a.gen)
 print(np.shape(hocs))
+
+
+catlist = []
+for key in self.movies.keys():
+    for cat in self.movies[key].genres:
+        if cat not in catlist:
+            catlist.append(cat)
+catlist.sort()
+for key in self.movies.keys():
+    self.movies[key].catvec = np.zeros(len(catlist))
+        for cat in self.movies[key].genres:
+        self.movies[key].catvec[catlist.index(cat)] = 1
