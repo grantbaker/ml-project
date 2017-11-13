@@ -8,13 +8,24 @@ import keras
 from keras.models import Sequential
 from keras.layers import Conv2D
 from keras.layers import Dense
-from keras.layers import MaxPool2D
 from keras.layers import Dropout
+from keras.layers import MaxPool2D
 from keras.layers import Flatten
 from keras.layers import BatchNormalization
 from keras.layers.core import Reshape
 
+from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
+
 from keras import backend as K
+
+from tensorflow.contrib.sparsemax import sparsemax_loss, sparsemax
+from tensorflow.python.ops import math_ops
+
+
+from tensorflow.contrib.util import loader
+from tensorflow.python.platform import resource_loader
+from tensorflow.python.framework import ops
+from tensorflow.python.ops import array_ops
 
 import movie
 import numpy as np
@@ -38,6 +49,97 @@ def f_score(y_true, y_pred):
     recall = recall(y_true, y_pred)
     return (1+beta**2)*((precision*recall)/((beta**2)*precision+recall))
 
+def sml(labels,logits):
+    sm=sparsemax(logits)
+    #loss = -np.dot(logits,labels)
+    #smz=sparsemax(logits)
+
+
+    shifted_logits = logits - \
+        math_ops.reduce_mean(logits, axis=1)[:, array_ops.newaxis]
+
+    # sum over support
+    support = math_ops.cast(sm > 0, sm.dtype)
+    sum_s = support * sm * (shifted_logits - 0.5 * sm)
+
+    # - z_k + ||q||^2
+    q_part = labels * (0.5 * labels - shifted_logits)
+
+    return math_ops.reduce_sum(sum_s + q_part, axis=1)
+
+class VGG16:
+    
+    def __init__(self, train_x, train_y, test_x, test_y, epochs = 15, batch_size=128):
+        '''
+        initialize CNN classifier
+        '''
+        self.batch_size = batch_size
+        self.epochs = epochs
+
+        # DONE: reshape train_x and test_x
+        # reshape our data from (n, length) to (n, width, height, 1) which width*height = length
+
+
+
+        # # normalize data to range [0, 1]
+        # train_x = train_x / 255
+        # test_x = test_x / 255
+
+        self.train_x = train_x
+        self.test_x = test_x
+        self.train_y = train_y
+        self.test_y = test_y
+        cats = len(test_y[0])
+
+        self.model = Sequential()
+        self.model.add(BatchNormalization(input_shape=(268,182,3,)))
+        self.model.add(Conv2D(64, 3, strides=1, padding='same', activation='relu'))
+        self.model.add(Conv2D(64, 3, strides=1, padding='same', activation='relu'))
+        self.model.add(MaxPool2D(pool_size=(2, 2)))
+
+        self.model.add(Conv2D(128, 3, strides=1, padding='same', activation='relu'))
+        self.model.add(Conv2D(128, 3, strides=1, padding='same', activation='relu'))
+        self.model.add(MaxPool2D(pool_size=(2, 2)))
+        
+        self.model.add(Conv2D(256, 3, strides=1, padding='same', activation='relu'))
+        self.model.add(Conv2D(256, 3, strides=1, padding='same', activation='relu'))
+        self.model.add(MaxPool2D(pool_size=(2, 2)))
+
+        self.model.add(Flatten())
+        self.model.add(Dense(4096, activation='relu'))
+        self.model.add(Dropout(0.5))
+        self.model.add(Dense(4096, activation='relu'))
+        self.model.add(Dropout(0.5))
+        self.model.add(Dense(cats, activation='sigmoid'))
+        
+
+        self.model.compile(loss=sml,
+              optimizer=keras.optimizers.Adadelta(),
+              metrics=['accuracy', f_score])
+
+    def train(self):
+        '''
+        train CNN classifier with training data
+        :param x: training data input
+        :param y: training label input
+        :return:
+        '''
+
+        self.model.fit(self.train_x, self.train_y,
+          batch_size=self.batch_size,
+          epochs=self.epochs,
+          verbose=1,
+          validation_data=(self.test_x, self.test_y))
+
+    def evaluate(self):
+        '''
+        test CNN classifier and get accuracy
+        :return: accuracy
+        '''
+        acc = self.model.evaluate(self.test_x, self.test_y)
+        return acc
+
+    
 class CNN:
     '''
     CNN classifier
@@ -84,7 +186,7 @@ class CNN:
         self.model.add(Dense(128, activation=act))
         self.model.add(Dense(cats, activation='sigmoid'))
 
-        self.model.compile(loss=keras.losses.binary_crossentropy,
+        self.model.compile(loss=sml,
               optimizer=keras.optimizers.Adadelta(),
               metrics=['accuracy', f_score])
 
@@ -110,6 +212,8 @@ class CNN:
         acc = self.model.evaluate(self.test_x, self.test_y)
         return acc
 
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='CNN classifier options')
     parser.add_argument('--limit', type=int, default=-1,
@@ -128,7 +232,7 @@ if __name__ == '__main__':
     mc.create_data_arrays(test_proportion=0.2)
     print('created data arrays')
 
-    cnn = CNN(mc.x_train[:args.limit], mc.y_train[:args.limit], mc.x_test, mc.y_test, epochs=50, batch_size=200)
+    cnn = VGG16(mc.x_train[:args.limit], mc.y_train[:args.limit], mc.x_test, mc.y_test, epochs=20, batch_size=1)
     cnn.train()
     acc = cnn.evaluate()
     print(acc)
