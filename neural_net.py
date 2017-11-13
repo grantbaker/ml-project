@@ -42,7 +42,7 @@ class CNN:
     '''
     CNN classifier
     '''
-    
+
     def __init__(self, train_x, train_y, test_x, test_y, epochs = 15, batch_size=128):
         '''
         initialize CNN classifier
@@ -115,7 +115,7 @@ if __name__ == '__main__':
     parser.add_argument('--limit', type=int, default=-1,
                         help='Restrict training to this many examples')
     args = parser.parse_args()
-    
+
     mc = movie.MovieContainer()
     mc.add_csv_file('data/MovieGenre.csv')
     print('added csv')
@@ -132,7 +132,7 @@ if __name__ == '__main__':
     cnn.train()
     acc = cnn.evaluate()
     print(acc)
-    
+
     print_size = 5
     evals = cnn.model.predict(mc.x_test[:print_size],batch_size=print_size)
     for i in range(print_size):

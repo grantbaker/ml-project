@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 import argparse
 import pickle
@@ -14,6 +17,15 @@ from keras.layers import Flatten
 from keras.layers import BatchNormalization
 from keras.layers.core import Reshape
 
+from tensorflow.contrib.sparsemax import sparsemax_loss, sparsemax
+from tensorflow.python.ops import math_ops
+
+
+from tensorflow.contrib.util import loader
+from tensorflow.python.platform import resource_loader
+from tensorflow.python.framework import ops
+from tensorflow.python.ops import array_ops
+
 from keras import backend as K
 import pickle
 
@@ -21,6 +33,29 @@ import pickle
 import HOC
 import numpy as np
 CSVF='data/MovieGenre.csv'
+def sml(labels,logits):
+    sm=sparsemax(logits)
+    #loss = -np.dot(logits,labels)
+    #smz=sparsemax(logits)
+
+
+    shifted_logits = logits - \
+        math_ops.reduce_mean(logits, axis=1)[:, array_ops.newaxis]
+
+    # sum over support
+    support = math_ops.cast(sm > 0, sm.dtype)
+    sum_s = support * sm * (shifted_logits - 0.5 * sm)
+
+    # - z_k + ||q||^2
+    q_part = labels * (0.5 * labels - shifted_logits)
+
+    return math_ops.reduce_sum(sum_s + q_part, axis=1)
+
+    #for i in range(np.shape(smz)[1]))
+        #if
+    #return loss
+
+
 def f_score(y_true, y_pred):
     def recall(y_true, y_pred):
         true_pos = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
@@ -69,9 +104,9 @@ class LOG:
         # DONE: build you CNN model
         act='relu'
         self.model = Sequential()
-        self.model.add(Dense(cats,input_shape=(96,),activation='sigmoid'))
+        self.model.add(Dense(cats,input_shape=(96,),activation=sparsemax))
 
-        self.model.compile(loss=keras.losses.binary_crossentropy,
+        self.model.compile(loss=sml,
               optimizer=keras.optimizers.Adadelta(),
               metrics=['accuracy', f_score])
 
@@ -108,7 +143,7 @@ if __name__ == '__main__':
     lis = pickle.load(f)
     f.close()
     print(np.shape(lis.y_train),np.shape(lis.y_test))
-    log = LOG(lis.x_train, lis.y_train, lis.x_test, lis.y_test, epochs=1000, batch_size=2048)
+    log = LOG(lis.x_train, lis.y_train, lis.x_test, lis.y_test, epochs=100, batch_size=200)
     log.train()
     acc = log.evaluate()
     print(acc)
