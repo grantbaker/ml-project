@@ -96,8 +96,10 @@ class INCEPTION:
         self.train_y = train_y
         self.test_y = test_y
         cats = len(test_y[0])
+        imsize = np.shape(train_x[0])
+        print(imsize)
     
-        input_tensor = Input(shape=(268,182,3,))
+        input_tensor = Input(shape=(imsize[0],imsize[1],imsize[2],))
 
         inception_model = InceptionV3(input_tensor=input_tensor, weights='imagenet', include_top=False)
         x = inception_model.output
@@ -105,13 +107,15 @@ class INCEPTION:
 
         x = Dense(4096, activation='relu')(x)
         x = Dropout(0.5)(x)
-        x = Dense(4096, activation='relu')(x)
+        x = Dense(2048, activation='relu')(x)
         genres = Dense(cats, activation='sigmoid')(x)
 
         self.model = Model(inputs=input_tensor, outputs=genres)
 
-        for layer in inception_model.layers:
+        for layer in inception_model.layers[:249]:
             layer.trainable = False
+        for layer in inception_model.layers[249:]:
+            layer.trainable = True
 
         self.model.compile(loss=sml,
               optimizer=keras.optimizers.Adadelta(),
@@ -236,7 +240,7 @@ if __name__ == '__main__':
     mc.create_data_arrays(test_proportion=0.2)
     print('created data arrays')
 
-    cnn = INCEPTION(mc.x_train[:args.limit], mc.y_train[:args.limit], mc.x_test, mc.y_test, epochs=10, batch_size=100)
+    cnn = INCEPTION(mc.x_train[:args.limit], mc.y_train[:args.limit], mc.x_test, mc.y_test, epochs=20, batch_size=128)
     cnn.train()
     acc = cnn.evaluate()
     print(acc)
