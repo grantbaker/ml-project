@@ -105,7 +105,7 @@ class INCEPTION:
         x = inception_model.output
         x = GlobalAveragePooling2D()(x)
 
-        x = Dense(4096, activation='relu')(x)
+        x = Dense(2048, activation='relu')(x)
         x = Dropout(0.5)(x)
         x = Dense(2048, activation='relu')(x)
         genres = Dense(cats, activation='sigmoid')(x)
