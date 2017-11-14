@@ -12,20 +12,26 @@ from keras.layers import Dropout
 from keras.layers import MaxPool2D
 from keras.layers import Flatten
 from keras.layers import BatchNormalization
+from keras.layers import Input
 from keras.layers.core import Reshape
 
-from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
-
+# for f_score calculation
 from keras import backend as K
 
+
+# for sml loss function
 from tensorflow.contrib.sparsemax import sparsemax_loss, sparsemax
 from tensorflow.python.ops import math_ops
-
 
 from tensorflow.contrib.util import loader
 from tensorflow.python.platform import resource_loader
 from tensorflow.python.framework import ops
 from tensorflow.python.ops import array_ops
+
+# for inception
+from keras.applications.inception_v3 import InceptionV3
+from keras.models import Model
+from keras.layers import GlobalAveragePooling2D
 
 import movie
 import numpy as np
@@ -67,9 +73,9 @@ def sml(labels,logits):
 
     return math_ops.reduce_sum(sum_s + q_part, axis=1)
 
-class VGG16:
+class INCEPTION:
     
-    def __init__(self, train_x, train_y, test_x, test_y, epochs = 15, batch_size=128):
+    def __init__(self, train_x, train_y, test_x, test_y, epochs=15, batch_size=128):
         '''
         initialize CNN classifier
         '''
@@ -90,32 +96,27 @@ class VGG16:
         self.train_y = train_y
         self.test_y = test_y
         cats = len(test_y[0])
+    
+        input_tensor = Input(shape=(268,182,3,))
 
-        self.model = Sequential()
-        self.model.add(BatchNormalization(input_shape=(268,182,3,)))
-        self.model.add(Conv2D(64, 3, strides=1, padding='same', activation='relu'))
-        self.model.add(Conv2D(64, 3, strides=1, padding='same', activation='relu'))
-        self.model.add(MaxPool2D(pool_size=(2, 2)))
+        inception_model = InceptionV3(input_tensor=input_tensor, weights='imagenet', include_top=False)
+        x = inception_model.output
+        x = GlobalAveragePooling2D()(x)
 
-        self.model.add(Conv2D(128, 3, strides=1, padding='same', activation='relu'))
-        self.model.add(Conv2D(128, 3, strides=1, padding='same', activation='relu'))
-        self.model.add(MaxPool2D(pool_size=(2, 2)))
-        
-        self.model.add(Conv2D(256, 3, strides=1, padding='same', activation='relu'))
-        self.model.add(Conv2D(256, 3, strides=1, padding='same', activation='relu'))
-        self.model.add(MaxPool2D(pool_size=(2, 2)))
+        x = Dense(4096, activation='relu')(x)
+        x = Dropout(0.5)(x)
+        x = Dense(4096, activation='relu')(x)
+        genres = Dense(cats, activation='sigmoid')(x)
 
-        self.model.add(Flatten())
-        self.model.add(Dense(4096, activation='relu'))
-        self.model.add(Dropout(0.5))
-        self.model.add(Dense(4096, activation='relu'))
-        self.model.add(Dropout(0.5))
-        self.model.add(Dense(cats, activation='sigmoid'))
-        
+        self.model = Model(inputs=input_tensor, outputs=genres)
+
+        for layer in inception_model.layers:
+            layer.trainable = False
 
         self.model.compile(loss=sml,
               optimizer=keras.optimizers.Adadelta(),
               metrics=['accuracy', f_score])
+
 
     def train(self):
         '''
@@ -139,7 +140,7 @@ class VGG16:
         acc = self.model.evaluate(self.test_x, self.test_y)
         return acc
 
-    
+
 class CNN:
     '''
     CNN classifier
@@ -171,19 +172,22 @@ class CNN:
         act='relu'
         self.model = Sequential()
         self.model.add(BatchNormalization(input_shape=(268,182,3,)))
-        self.model.add(Conv2D(64, 5, strides=5, padding='same', activation=act))
-        #self.model.add(Conv2D(64, 3, strides=3, padding='same', activation=act))
+        self.model.add(Conv2D(64, 3, strides=3, padding='same', activation=act))
+        self.model.add(Conv2D(64, 3, strides=3, padding='same', activation=act))
         self.model.add(MaxPool2D(pool_size=(2, 2)))
+        self.model.add(Conv2D(128, 3, strides=3, padding='same', activation=act))
         self.model.add(Conv2D(128, 3, strides=3, padding='same', activation=act))
         self.model.add(MaxPool2D(pool_size=(2, 2)))
         self.model.add(Conv2D(256, 3, strides=3, padding='same', activation=act))
+        self.model.add(Conv2D(512, 3, strides=3, padding='same', activation=act))
         self.model.add(Flatten())
         self.model.add(Dropout(0.5))
-        self.model.add(Dense(8192, activation=act))
+        self.model.add(Dense(4096, activation=act))
         #self.model.add(BatchNormalization())
-        self.model.add(Dense(1024, activation=act))
+        self.model.add(Dropout(0.5))
+        self.model.add(Dense(4096, activation=act))
         #self.model.add(Dropout(0.5))
-        self.model.add(Dense(128, activation=act))
+        #self.model.add(Dense(128, activation=act))
         self.model.add(Dense(cats, activation='sigmoid'))
 
         self.model.compile(loss=sml,
@@ -232,7 +236,7 @@ if __name__ == '__main__':
     mc.create_data_arrays(test_proportion=0.2)
     print('created data arrays')
 
-    cnn = VGG16(mc.x_train[:args.limit], mc.y_train[:args.limit], mc.x_test, mc.y_test, epochs=20, batch_size=1)
+    cnn = INCEPTION(mc.x_train[:args.limit], mc.y_train[:args.limit], mc.x_test, mc.y_test, epochs=10, batch_size=100)
     cnn.train()
     acc = cnn.evaluate()
     print(acc)
