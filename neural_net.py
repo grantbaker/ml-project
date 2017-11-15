@@ -74,7 +74,7 @@ def sml(labels,logits):
     return math_ops.reduce_sum(sum_s + q_part, axis=1)
 
 class INCEPTION:
-    
+
     def __init__(self, train_x, train_y, test_x, test_y, epochs=15, batch_size=128):
         '''
         initialize CNN classifier
@@ -98,16 +98,16 @@ class INCEPTION:
         cats = len(test_y[0])
         imsize = np.shape(train_x[0])
         print(imsize)
-    
+
         input_tensor = Input(shape=(imsize[0],imsize[1],imsize[2],))
 
         inception_model = InceptionV3(input_tensor=input_tensor, weights='imagenet', include_top=False)
         x = inception_model.output
         x = GlobalAveragePooling2D()(x)
 
-        x = Dense(2048, activation='relu')(x)
+        x = Dense(8192, activation='relu')(x)
         x = Dropout(0.5)(x)
-        x = Dense(2048, activation='relu')(x)
+        x = Dense(8192, activation='relu')(x)
         genres = Dense(cats, activation='sigmoid')(x)
 
         self.model = Model(inputs=input_tensor, outputs=genres)
@@ -240,7 +240,7 @@ if __name__ == '__main__':
     mc.create_data_arrays(test_proportion=0.2)
     print('created data arrays')
 
-    cnn = INCEPTION(mc.x_train[:args.limit], mc.y_train[:args.limit], mc.x_test, mc.y_test, epochs=20, batch_size=128)
+    cnn = INCEPTION(mc.x_train[:args.limit], mc.y_train[:args.limit], mc.x_test, mc.y_test, epochs=1, batch_size=128)
     cnn.train()
     acc = cnn.evaluate()
     print(acc)
@@ -248,4 +248,9 @@ if __name__ == '__main__':
     print_size = 5
     evals = cnn.model.predict(mc.x_test[:print_size],batch_size=print_size)
     for i in range(print_size):
-        print(mc.y_test[i], ' | ', evals[i])
+        evals_genres = list(zip(evals[i],mc.genre_list))
+        evals_genres.sort(reverse=True)
+        print(evals[i])
+        print(evals_genres[0:2])
+        print(mc.x_test_filenames[i])
+        #print(mc.y_test[i], ' | ', evals[i])
