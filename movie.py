@@ -32,7 +32,7 @@ class Movie():
         self.score = csvline[3]
         self.genres = csvline[4].split('|')
         self.poster_link = csvline[5]
-        
+
         self.catvec = -1
         self.matrix = -1
 
@@ -46,8 +46,11 @@ class MovieContainer():
 
         self.x_train = -1
         self.x_test = -1
+        self.y_test_labels = []
+        self.x_test_filenames = []
         self.y_train = -1
         self.y_test = -1
+        self.genre_list = []
 
     def add_csv_file(self, csvfile):
         with open(csvfile) as f:
@@ -96,6 +99,7 @@ class MovieContainer():
                     catlist.append(cat)
 
         catlist.sort()
+        self.genre_list = catlist[:]
 
         for key in self.movies.keys():
             self.movies[key].catvec = np.zeros(len(catlist))
@@ -107,7 +111,7 @@ class MovieContainer():
         for key in self.movies.keys():
             filename = str(key) + '.jpg'
             self.movies[key].matrix = imread(os.path.join(DATA_LOCATION, filename), mode='RGB')
-            
+
         self.images_loaded = True
 
     def remove_images_from_mem(self):
@@ -134,7 +138,7 @@ class MovieContainer():
             shapes[sh].append(key)
 
         max_shape = max(shapes, key= lambda x: len(set(shapes[x])))
-        
+
         num_deleted = 0
         for sh in [shape for shape in shapes.keys() if shape != max_shape]:
             for key in shapes[sh]:
@@ -148,7 +152,7 @@ class MovieContainer():
         split_i = int(len(key_list)*test_proportion)
         test_list = key_list[0:split_i]
         train_list = key_list[split_i:]
-        
+
         #print(test_list, train_list)
 
         im_size = imread(os.path.join(DATA_LOCATION, str(test_list[0]) + '.jpg')).shape
@@ -162,7 +166,9 @@ class MovieContainer():
             else:
                 filename = str(key) + '.jpg'
                 self.x_test[i] = imread(os.path.join(DATA_LOCATION, filename), mode='RGB')
+                self.x_test_filenames.append(filename)
             self.y_test[i] = self.movies[key].catvec
+            self.y_test_labels.append(self.movies[key].genres)
             i += 1
 
         self.x_train = np.zeros((len(train_list), im_size[0], im_size[1], im_size[2]), dtype=np.int8)
@@ -178,8 +184,17 @@ class MovieContainer():
             i += 1
 
 
-
-
-
-
-
+# mc = MovieContainer()
+# mc.add_csv_file('data/MovieGenre.csv')
+# print('added csv')
+# mc.remove_movies_without_posters()
+# print('removed without files')
+# mc.remove_different_size_images()
+# print('removed different sizes')
+# mc.create_cat_vecs()
+# print('created cat vecs')
+# mc.create_data_arrays(test_proportion=0.2)
+# print('created data arrays')
+# print("y_test_labels",mc.y_test_labels[0:5])
+# print("x_test_filenames",mc.x_test_filenames[0:5])
+# print("genre_list", mc.genre_list)
