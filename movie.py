@@ -12,7 +12,7 @@ DATA_LOCATION = os.path.join('data','download')
 class Movie():
 
     def __init__(self, csvline):
-        # print(csvline)
+        #print(csvline)
 
         # csvline is of the following format:
         # csvline = [imdbId, imdb_link, title, score, genres, poster_link]
@@ -32,6 +32,8 @@ class Movie():
         self.score = csvline[3]
         self.genres = csvline[4].split('|')
         self.poster_link = csvline[5]
+        self.actors = csvline[9].split('|')
+        self.director = csvline[10]
 
         self.catvec = -1
         self.matrix = -1
@@ -44,8 +46,12 @@ class MovieContainer():
 
         self.images_loaded = False
 
-        self.x_train = -1
-        self.x_test = -1
+        self.x_train_images = -1
+        self.x_train_actor_names = []
+        self.x_train_directors = []
+        self.x_test_images = -1
+        self.x_test_actor_names = []
+        self.x_test_directors = []
         self.y_test_labels = []
         self.x_test_filenames = []
         self.y_train = -1
@@ -157,44 +163,45 @@ class MovieContainer():
 
         im_size = imread(os.path.join(DATA_LOCATION, str(test_list[0]) + '.jpg')).shape
 
-        self.x_test = np.zeros((len(test_list), im_size[0], im_size[1], im_size[2]), dtype=np.int8)
+        self.x_test_images = np.zeros((len(test_list), im_size[0], im_size[1], im_size[2]), dtype=np.int8)
         self.y_test = np.zeros((len(test_list), self.movies[test_list[0]].catvec.shape[0]), dtype=np.int8)
         i = 0
         for key in test_list:
             if self.images_loaded:
-                self.x_test[i] = self.movies[key].matrix
+                self.x_test_images[i] = self.movies[key].matrix
             else:
                 filename = str(key) + '.jpg'
-                self.x_test[i] = imread(os.path.join(DATA_LOCATION, filename), mode='RGB')
+                self.x_test_images[i] = imread(os.path.join(DATA_LOCATION, filename), mode='RGB')
                 self.x_test_filenames.append(filename)
+            self.x_test_actor_names.append(self.movies[key].actors)
+            self.x_test_directors.append(self.movies[key].director)
             self.y_test[i] = self.movies[key].catvec
             self.y_test_labels.append(self.movies[key].genres)
             i += 1
 
-        self.x_train = np.zeros((len(train_list), im_size[0], im_size[1], im_size[2]), dtype=np.int8)
+        self.x_train_images = np.zeros((len(train_list), im_size[0], im_size[1], im_size[2]), dtype=np.int8)
         self.y_train = np.zeros((len(train_list), self.movies[train_list[0]].catvec.shape[0]), dtype=np.int8)
         i = 0
         for key in train_list:
             if self.images_loaded:
-                self.x_train[i] = self.movies[key].matrix
+                self.x_train_images[i] = self.movies[key].matrix
             else:
                 filename = str(key) + '.jpg'
-                self.x_train[i] = imread(os.path.join(DATA_LOCATION, filename), mode='RGB')
+                self.x_train_images[i] = imread(os.path.join(DATA_LOCATION, filename), mode='RGB')
+            self.x_train_actor_names.append(self.movies[key].actors)
+            self.x_train_directors.append(self.movies[key].director)
             self.y_train[i] = self.movies[key].catvec
             i += 1
 
 
-# mc = MovieContainer()
-# mc.add_csv_file('data/MovieGenre.csv')
-# print('added csv')
-# mc.remove_movies_without_posters()
-# print('removed without files')
-# mc.remove_different_size_images()
-# print('removed different sizes')
-# mc.create_cat_vecs()
-# print('created cat vecs')
-# mc.create_data_arrays(test_proportion=0.2)
-# print('created data arrays')
-# print("y_test_labels",mc.y_test_labels[0:5])
-# print("x_test_filenames",mc.x_test_filenames[0:5])
-# print("genre_list", mc.genre_list)
+mc = MovieContainer()
+mc.add_csv_file('data/MetaData2.csv')
+print('added csv')
+mc.remove_movies_without_posters()
+print('removed without files')
+mc.remove_different_size_images()
+print('removed different sizes')
+mc.create_cat_vecs()
+print('created cat vecs')
+mc.create_data_arrays(test_proportion=0.2)
+print('created data arrays')

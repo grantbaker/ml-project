@@ -229,7 +229,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     mc = movie.MovieContainer()
-    mc.add_csv_file('data/MovieGenre.csv')
+    mc.add_csv_file('data/MetaData2.csv')
     print('added csv')
     mc.remove_movies_without_posters()
     print('removed without files')
