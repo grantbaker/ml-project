@@ -75,7 +75,7 @@ def sml(labels,logits):
 
 class INCEPTION:
 
-    def __init__(self, train_x, train_y, test_x, test_y, epochs=15, batch_size=128):
+    def __init__(self, train_x_images, train_x_actors, train_x_directors, train_y, test_x_images, test_x_actors, test_x_directors, test_y, epochs=15, batch_size=128):
         '''
         initialize CNN classifier
         '''
@@ -91,26 +91,39 @@ class INCEPTION:
         # train_x = train_x / 255
         # test_x = test_x / 255
 
-        self.train_x = train_x
-        self.test_x = test_x
+        self.train_x_images = train_x_images
+        self.test_x_images = test_x_images
+        self.train_x_actors = train_x_actors
+        self.test_x_actors = test_x_actors
+        self.train_x_directors = train_x_directors
+        self.test_x_directors = test_x_directors
         self.train_y = train_y
         self.test_y = test_y
         cats = len(test_y[0])
-        imsize = np.shape(train_x[0])
-        print(imsize)
+        imsize = np.shape(train_x_images[0])
+        actor_size = np.shape(train_x_actors[0])
+        director_size = np.shape(train_x_directors[0])
+        print(train_x_images[0])
+        print("imsize",imsize)
+        print(train_x_actors[0])
+        print("actor_size", actor_size)
+        print(train_x_directors[0])
+        print("director_size", director_size)
 
         input_tensor = Input(shape=(imsize[0],imsize[1],imsize[2],))
 
         inception_model = InceptionV3(input_tensor=input_tensor, weights='imagenet', include_top=False)
-        x = inception_model.output
+        first_out = inception_model.output
+        actor_input = Input(shape=(actor_size[0],))
+        director_input = Input(shape=(1,))
+        x = keras.layers.concatenate([first_out,actor_input,director_input])
         x = GlobalAveragePooling2D()(x)
-
         x = Dense(8192, activation='relu')(x)
         x = Dropout(0.5)(x)
         x = Dense(8192, activation='relu')(x)
         genres = Dense(cats, activation='sigmoid')(x)
 
-        self.model = Model(inputs=input_tensor, outputs=genres)
+        self.model = Model(inputs=[input_tensor,actor_input,director_input], outputs=genres)
 
         for layer in inception_model.layers[:249]:
             layer.trainable = False
@@ -130,18 +143,18 @@ class INCEPTION:
         :return:
         '''
 
-        self.model.fit(self.train_x, self.train_y,
+        self.model.fit([self.train_x_images, self.train_x_actors,train_x_directors], self.train_y,
           batch_size=self.batch_size,
           epochs=self.epochs,
           verbose=1,
-          validation_data=(self.test_x, self.test_y))
+          validation_data=([self.test_x_images, self.test_x_actors,test_x_directors], self.test_y))
 
     def evaluate(self):
         '''
         test CNN classifier and get accuracy
         :return: accuracy
         '''
-        acc = self.model.evaluate(self.test_x, self.test_y)
+        acc = self.model.evaluate(self.test_x_images, self.test_y)
         return acc
 
 
@@ -240,7 +253,7 @@ if __name__ == '__main__':
     mc.create_data_arrays(test_proportion=0.2)
     print('created data arrays')
 
-    cnn = INCEPTION(mc.x_train_images[:args.limit], mc.y_train[:args.limit], mc.x_test_images, mc.y_test, epochs=1, batch_size=128)
+    cnn = INCEPTION(mc.x_train_images, mc.x_train_actor_names,mc.x_train_directors, mc.y_train, mc.x_test_images, mc.x_test_actor_names, mc.x_test_directors, mc.y_test, epochs=1, batch_size=128)
     cnn.train()
     acc = cnn.evaluate()
     print(acc)
