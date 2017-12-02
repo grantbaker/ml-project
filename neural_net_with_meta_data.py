@@ -129,14 +129,12 @@ class INCEPTION:
         x = Dropout(0.5)(x)
         x = Dense(8192, activation='relu')(x)
         genres = Dense(cats, activation='sigmoid')(x)
-
         self.model = Model(inputs=[input_tensor,actor_input,director_input], outputs=genres)
 
         for layer in inception_model.layers[:249]:
             layer.trainable = False
         for layer in inception_model.layers[249:]:
             layer.trainable = True
-
         self.model.compile(loss=sml,
               optimizer=keras.optimizers.Adadelta(),
               metrics=['accuracy', f_score])
@@ -149,7 +147,8 @@ class INCEPTION:
         :param y: training label input
         :return:
         '''
-
+	# FAILURE: in size or shape of validatio_data=...
+        # Error in input two, expects 4 dimensions but gets 2
         self.model.fit([self.train_x_images, self.train_x_actors,self.train_x_directors], self.train_y,
           batch_size=self.batch_size,
           epochs=self.epochs,
