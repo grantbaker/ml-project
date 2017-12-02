@@ -114,8 +114,8 @@ class INCEPTION:
 
         inception_model = InceptionV3(input_tensor=input_tensor, weights='imagenet', include_top=False)
         first_out = inception_model.output
-        actor_input = Input(shape=(actor_size[0],))
-        director_input = Input(shape=(1,))
+        actor_input = Input(shape=(7,4,2048))
+        director_input = Input(shape=(7,4,2048,))
         x = keras.layers.concatenate([first_out,actor_input,director_input])
         x = GlobalAveragePooling2D()(x)
         x = Dense(8192, activation='relu')(x)
@@ -143,11 +143,11 @@ class INCEPTION:
         :return:
         '''
 
-        self.model.fit([self.train_x_images, self.train_x_actors,train_x_directors], self.train_y,
+        self.model.fit([self.train_x_images, self.train_x_actors,self.train_x_directors], self.train_y,
           batch_size=self.batch_size,
           epochs=self.epochs,
           verbose=1,
-          validation_data=([self.test_x_images, self.test_x_actors,test_x_directors], self.test_y))
+          validation_data=([self.test_x_images, self.test_x_actors,self.test_x_directors], self.test_y))
 
     def evaluate(self):
         '''
