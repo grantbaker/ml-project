@@ -149,6 +149,7 @@ class INCEPTION:
         '''
 	# FAILURE: in size or shape of validatio_data=...
         # Error in input two, expects 4 dimensions but gets 2
+        # TODO: Check size of all inputs for debugging
         self.model.fit([self.train_x_images, self.train_x_actors,self.train_x_directors], self.train_y,
           batch_size=self.batch_size,
           epochs=self.epochs,
