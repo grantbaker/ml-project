@@ -93,10 +93,10 @@ class INCEPTION:
 
         self.train_x_images = train_x_images
         self.test_x_images = test_x_images
-        self.train_x_actors = train_x_actors
-        self.test_x_actors = test_x_actors
-        self.train_x_directors = train_x_directors
-        self.test_x_directors = test_x_directors
+        self.train_x_actors = np.array(train_x_actors)
+        self.test_x_actors = np.array(test_x_actors)
+        self.train_x_directors = np.array(train_x_directors)
+        self.test_x_directors = np.array(test_x_directors)
         self.train_y = train_y
         self.test_y = test_y
         cats = len(test_y[0])
@@ -111,6 +111,13 @@ class INCEPTION:
         print("director_size", director_size)
 
         input_tensor = Input(shape=(imsize[0],imsize[1],imsize[2],))
+	
+        print("------------------------------")
+        print(type(self.train_x_images))
+        print(type(self.train_x_actors))
+        print(type(self.train_x_directors))
+        print(type(self.train_y))
+        print("------------------------------")
 
         inception_model = InceptionV3(input_tensor=input_tensor, weights='imagenet', include_top=False)
         first_out = inception_model.output
