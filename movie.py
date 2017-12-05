@@ -36,6 +36,8 @@ class Movie():
         self.director = csvline[10]
 
         self.catvec = -1
+        self.actorsvec = -1
+        self.directorsvec = -1
         self.matrix = -1
 
 
@@ -47,11 +49,11 @@ class MovieContainer():
         self.images_loaded = False
 
         self.x_train_images = -1
-        self.x_train_actor_names = []
-        self.x_train_directors = []
+        self.x_train_actor_names = -1
+        self.x_train_directors = -1
         self.x_test_images = -1
-        self.x_test_actor_names = []
-        self.x_test_directors = []
+        self.x_test_actor_names = -1
+        self.x_test_directors = -1
         self.y_test_labels = []
         self.x_test_filenames = []
         self.y_train = -1
@@ -76,7 +78,8 @@ class MovieContainer():
                         if key not in self.movies.keys():
                             self.movies[key] = Movie(row)
                     except Exception as e:
-                        print(row)
+                        pass
+                        #print(row)
 
     def remove_movies_without_links(self):
         removekeys = []
@@ -112,6 +115,30 @@ class MovieContainer():
 
             for cat in self.movies[key].genres:
                  self.movies[key].catvec[catlist.index(cat)] = 1
+
+    def create_actor_vecs(self):
+        actor_list = []
+        for key in self.movies.keys():
+            for actor in self.movies[key].actors:
+                if actor not in actor_list:
+                    actor_list.append(actor)
+        actor_list.sort()
+        for key in self.movies.keys():
+            self.movies[key].actorsvec = np.zeros(len(actor_list))
+
+            for actor in self.movies[key].actors:
+                self.movies[key].actorsvec[actor_list.index(actor)] = 1
+
+    def create_director_vecs(self):
+        director_list = []
+        for key in self.movies.keys():
+            if self.movies[key].director not in director_list:
+                director_list.append(self.movies[key].director)
+        director_list.sort()
+        for key in self.movies.keys():
+            self.movies[key].directorsvec = np.zeros(len(director_list))
+            self.movies[key].directorsvec[director_list.index(self.movies[key].director)] = 1
+
 
     def load_images_into_mem(self):
         for key in self.movies.keys():
@@ -162,8 +189,12 @@ class MovieContainer():
         #print(test_list, train_list)
 
         im_size = imread(os.path.join(DATA_LOCATION, str(test_list[0]) + '.jpg')).shape
+        actor_size = len(self.movies[test_list[0]].actors)
+        director_size = len(self.movies[test_list[0]].director)
 
         self.x_test_images = np.zeros((len(test_list), im_size[0], im_size[1], im_size[2]), dtype=np.int8)
+        self.x_test_directors = np.zeros((len(test_list), director_size), dtype=np.int8)
+        self.x_test_actors = np.zeros((len(test_list), actor_size), dtype=np.int8)
         self.y_test = np.zeros((len(test_list), self.movies[test_list[0]].catvec.shape[0]), dtype=np.int8)
         i = 0
         for key in test_list:
@@ -173,13 +204,15 @@ class MovieContainer():
                 filename = str(key) + '.jpg'
                 self.x_test_images[i] = imread(os.path.join(DATA_LOCATION, filename), mode='RGB')
                 self.x_test_filenames.append(filename)
-            self.x_test_actor_names.append(self.movies[key].actors)
-            self.x_test_directors.append(self.movies[key].director)
+            self.x_test_actor_names[i] = self.movies[key].actorsvec
+            self.x_test_directors = self.movies[key].directorsvec
             self.y_test[i] = self.movies[key].catvec
             self.y_test_labels.append(self.movies[key].genres)
             i += 1
 
         self.x_train_images = np.zeros((len(train_list), im_size[0], im_size[1], im_size[2]), dtype=np.int8)
+        self.x_train_directors = np.zeros((len(train_list), director_size), dtype=np.int8)
+        self.x_train_actors = np.zeros((len(train_list), actor_size), dtype=np.int8)
         self.y_train = np.zeros((len(train_list), self.movies[train_list[0]].catvec.shape[0]), dtype=np.int8)
         i = 0
         for key in train_list:
@@ -188,20 +221,24 @@ class MovieContainer():
             else:
                 filename = str(key) + '.jpg'
                 self.x_train_images[i] = imread(os.path.join(DATA_LOCATION, filename), mode='RGB')
-            self.x_train_actor_names.append(self.movies[key].actors)
-            self.x_train_directors.append(self.movies[key].director)
+            self.x_train_actor_names[i] = self.movies[key].actorsvec
+            self.x_train_directors = self.movies[key].directorsvec
             self.y_train[i] = self.movies[key].catvec
             i += 1
 
 
-# mc = MovieContainer()
-# mc.add_csv_file('data/MetaData2.csv')
-# print('added csv')
-# mc.remove_movies_without_posters()
-# print('removed without files')
-# mc.remove_different_size_images()
-# print('removed different sizes')
-# mc.create_cat_vecs()
-# print('created cat vecs')
-# mc.create_data_arrays(test_proportion=0.2)
-# print('created data arrays')
+mc = MovieContainer()
+mc.add_csv_file('data/MetaData2.csv')
+print('added csv')
+mc.remove_movies_without_posters()
+print('removed without files')
+mc.remove_different_size_images()
+print('removed different sizes')
+mc.create_cat_vecs()
+print('created cat vecs')
+mc.create_actor_vecs()
+print('created actor vecs')
+mc.create_director_vecs()
+print('created director vecs')
+mc.create_data_arrays(test_proportion=0.2)
+print('created data arrays')
