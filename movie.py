@@ -33,6 +33,12 @@ class Movie():
         self.genres = csvline[4].split('|')
         self.poster_link = csvline[5]
         self.actors = csvline[9].split('|')
+        if len(self.actors) < 5:
+            act_list_len = len(self.actors)
+            for i in range(5-act_list_len):
+                self.actors.append('')
+        # for i in range(5):
+        #     self.actors[i] = self.actors[i].replace(" ", "")
         self.director = csvline[10]
 
         self.catvec = -1
@@ -47,11 +53,11 @@ class MovieContainer():
         self.images_loaded = False
 
         self.x_train_images = -1
-        self.x_train_actor_names = []
-        self.x_train_directors = []
+        self.x_train_actor_names = -1
+        self.x_train_directors = -1
         self.x_test_images = -1
-        self.x_test_actor_names = []
-        self.x_test_directors = []
+        self.x_test_actor_names = -1
+        self.x_test_directors = -1
         self.y_test_labels = []
         self.x_test_filenames = []
         self.y_train = -1
@@ -162,8 +168,11 @@ class MovieContainer():
         #print(test_list, train_list)
 
         im_size = imread(os.path.join(DATA_LOCATION, str(test_list[0]) + '.jpg')).shape
+        actor_size = len(self.movies[test_list[0]].actors)
 
         self.x_test_images = np.zeros((len(test_list), im_size[0], im_size[1], im_size[2]), dtype=np.int8)
+        self.x_test_actor_names = np.zeros((len(test_list),1,1, actor_size),dtype='|S50')
+        self.x_test_directors = np.zeros((len(test_list),1,1, 1),dtype='|S50')
         self.y_test = np.zeros((len(test_list), self.movies[test_list[0]].catvec.shape[0]), dtype=np.int8)
         i = 0
         for key in test_list:
@@ -173,13 +182,15 @@ class MovieContainer():
                 filename = str(key) + '.jpg'
                 self.x_test_images[i] = imread(os.path.join(DATA_LOCATION, filename), mode='RGB')
                 self.x_test_filenames.append(filename)
-            self.x_test_actor_names.append(self.movies[key].actors)
-            self.x_test_directors.append(self.movies[key].director)
+            self.x_test_actor_names[i] = self.movies[key].actors
+            self.x_test_directors[i] = self.movies[key].director
             self.y_test[i] = self.movies[key].catvec
             self.y_test_labels.append(self.movies[key].genres)
             i += 1
 
         self.x_train_images = np.zeros((len(train_list), im_size[0], im_size[1], im_size[2]), dtype=np.int8)
+        self.x_train_actor_names = np.zeros((len(train_list),1,1, actor_size),dtype='|S50')
+        self.x_train_directors = np.zeros((len(train_list),1,1, 1),dtype='|S50')
         self.y_train = np.zeros((len(train_list), self.movies[train_list[0]].catvec.shape[0]), dtype=np.int8)
         i = 0
         for key in train_list:
@@ -188,8 +199,8 @@ class MovieContainer():
             else:
                 filename = str(key) + '.jpg'
                 self.x_train_images[i] = imread(os.path.join(DATA_LOCATION, filename), mode='RGB')
-            self.x_train_actor_names.append(self.movies[key].actors)
-            self.x_train_directors.append(self.movies[key].director)
+            self.x_train_actor_names[i] = self.movies[key].actors
+            self.x_train_directors[i] = self.movies[key].director
             self.y_train[i] = self.movies[key].catvec
             i += 1
 

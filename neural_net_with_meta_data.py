@@ -111,7 +111,7 @@ class INCEPTION:
         print("director_size", director_size)
 
         input_tensor = Input(shape=(imsize[0],imsize[1],imsize[2],))
-	
+
         print("----------")
         print(type(self.train_x_images))
         print(type(self.train_x_actors))
@@ -122,7 +122,7 @@ class INCEPTION:
         inception_model = InceptionV3(input_tensor=input_tensor, weights='imagenet', include_top=False)
         first_out = inception_model.output
         actor_input = Input(shape=(7,4,2048))
-        director_input = Input(shape=(7,4,2048,))
+        director_input = Input(shape=(7,4,2048))
         x = keras.layers.concatenate([first_out,actor_input,director_input])
         x = GlobalAveragePooling2D()(x)
         x = Dense(8192, activation='relu')(x)
@@ -150,18 +150,20 @@ class INCEPTION:
 	# FAILURE: in size or shape of validatio_data=...
         # Error in input two, expects 4 dimensions but gets 2
         # TODO: Check size of all inputs for debugging
-        
+
         print("----------")
         print(self.train_x_images.shape)
         print(self.train_x_actors.shape)
+        print(self.train_x_actors[0])
         print(self.train_x_directors.shape)
+        print(self.train_x_directors[0])
         print(self.train_y.shape)
         print("----------")
-        print(self.test_x_images.shape)
-        print(self.test_x_actors.shape)
-        print(self.test_x_directors.shape)
-        print(self.test_y.shape)
-        print("----------")
+        # print(self.test_x_images.shape)
+        # print(self.test_x_actors.shape)
+        # print(self.test_x_directors.shape)
+        # print(self.test_y.shape)
+        # print("----------")
 
         self.model.fit([self.train_x_images, self.train_x_actors,self.train_x_directors], self.train_y,
           batch_size=self.batch_size,
