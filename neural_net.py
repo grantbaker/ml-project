@@ -14,6 +14,7 @@ from keras.layers import Flatten
 from keras.layers import BatchNormalization
 from keras.layers import Input
 from keras.layers.core import Reshape
+from keras.models import load_model
 
 # for f_score calculation
 from keras import backend as K
@@ -144,6 +145,9 @@ class INCEPTION:
         acc = self.model.evaluate(self.test_x, self.test_y)
         return acc
 
+    def save(self):
+        self.model.save('inception_nn.h5')
+
 
 class CNN:
     '''
@@ -240,17 +244,56 @@ if __name__ == '__main__':
     mc.create_data_arrays(test_proportion=0.2)
     print('created data arrays')
 
-    cnn = INCEPTION(mc.x_train_images[:args.limit], mc.y_train[:args.limit], mc.x_test_images, mc.y_test, epochs=1, batch_size=128)
+    cnn = INCEPTION(mc.x_train_images[:args.limit], mc.y_train[:args.limit], mc.x_test_images, mc.y_test, epochs=20, batch_size=128)
     cnn.train()
     acc = cnn.evaluate()
     print(acc)
+    cnn.save()
+    #trained_model = load_model('inception_nn.h5')
+    interesting_movies_ids = [80684,1408101,116629,59113,373889,847817,2081194,119698,245429,887912,1337032,1121964,120623]
+    im_size = mc.x_test_images[0].shape
+    interesting_movie_images = np.zeros((len(interesting_movies_ids),im_size[0],im_size[1],im_size[2]),dtype=np.int8)
+    i = 0
+    interesting_y_test = []
+    for idd in interesting_movies_ids:
+        index_of_id =  mc.x_test_id.index(idd)
+        interesting_movie_images[i] = mc.x_test_images[index_of_id]
+        interesting_y_test.append(mc.y_test[index_of_id])
+        i += 1
 
-    print_size = 5
-    evals = cnn.model.predict(mc.x_test[:print_size],batch_size=print_size)
+
+
+    interesting_evals = cnn.model.predict(interesting_movie_images,batch_size=len(interesting_movie_images))
+    print("interesting evals \n ----------------")
+    for i in range(len(interesting_evals)):
+        evals_genres = list(zip(interesting_evals[i],mc.genre_list))
+        evals_genres.sort(reverse=True)
+        #print(interesting_evals[i])
+        print(evals_genres[0:3])
+        print(interesting_y_test[i])
+        actual_genres = []
+        for j in range(len(interesting_y_test[i])):
+            if interesting_y_test[i][j] == 1:
+                actual_genres.append(mc.genre_list[j])
+        print("actual_genres", actual_genres)
+        print(interesting_movies_ids[i])
+    print("-------------")
+    print("-------------")
+    print("-------------")
+    print("-------------")
+    print("-------------")
+    print_size = 20
+    evals = cnn.model.predict(mc.x_test_images[:print_size],batch_size=print_size)
     for i in range(print_size):
         evals_genres = list(zip(evals[i],mc.genre_list))
         evals_genres.sort(reverse=True)
-        print(evals[i])
-        print(evals_genres[0:2])
+        #print(evals[i])
+        print(evals_genres[0:3])
+        actual_genres = []
+        for j in range(30):
+            if mc.y_test[i][j] == 1:
+                actual_genres.append(mc.genre_list[j])
+        print("actual_genres", actual_genres)
         print(mc.x_test_filenames[i])
         #print(mc.y_test[i], ' | ', evals[i])
+    print(mc.y_test.shape)

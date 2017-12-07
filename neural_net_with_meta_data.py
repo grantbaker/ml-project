@@ -120,9 +120,10 @@ class INCEPTION:
         print("----------")
 
         inception_model = InceptionV3(input_tensor=input_tensor, weights='imagenet', include_top=False)
-        first_out = inception_model.output
-        actor_input = Input(shape=(7,4,2048))
-        director_input = Input(shape=(7,4,2048))
+        x = inception_model.output
+        first_out = Flatten()(x)
+        actor_input = Input(shape=(57344))
+        director_input = Input(shape=(57344))
         x = keras.layers.concatenate([first_out,actor_input,director_input])
         x = GlobalAveragePooling2D()(x)
         x = Dense(8192, activation='relu')(x)

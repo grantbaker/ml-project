@@ -1,0 +1,122 @@
+acc = [0.80956726273705282, 0.26342780027392743, 0.3945900362995472]
+
+interesting evals
+ ----------------
+[(0.99999917, 'Drama'), (0.99384981, 'Comedy'), (0.96187943, 'Horror')]
+[0 0 1 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+actual_genres ['Action', 'Adventure', 'Fantasy']
+80684
+[(0.99999988, 'Drama'), (0.99987519, 'Horror'), (0.99836057, 'Thriller')]
+[0 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0]
+actual_genres ['Action', 'Adventure', 'Sci-Fi']
+1408101
+[(1.0, 'Drama'), (0.96120787, 'Documentary'), (0.88534451, 'Comedy')]
+[0 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0]
+actual_genres ['Action', 'Adventure', 'Sci-Fi']
+116629
+[(0.99999475, 'Drama'), (0.9940328, 'Comedy'), (0.89904118, 'Romance')]
+[0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0]
+actual_genres ['Drama', 'Romance', 'War']
+59113
+[(1.0, 'Thriller'), (1.0, 'Drama'), (0.99999321, 'Crime')]
+[0 0 0 0 1 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+actual_genres ['Adventure', 'Family', 'Fantasy']
+373889
+[(1.0, 'Drama'), (0.9978295, 'Comedy'), (0.97391164, 'Documentary')]
+[0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+actual_genres ['Documentary']
+847817
+[(1.0, 'Drama'), (0.99999058, 'Comedy'), (0.99947101, 'Adventure')]
+[0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+actual_genres ['Comedy', 'Horror']
+2081194
+[(0.99999857, 'Drama'), (0.99963665, 'Comedy'), (0.98518896, 'Fantasy')]
+[0 0 0 0 1 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+actual_genres ['Adventure', 'Animation', 'Fantasy']
+119698
+[(1.0, 'Drama'), (0.99966264, 'Documentary'), (0.98342025, 'Biography')]
+[0 0 0 0 1 1 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+actual_genres ['Adventure', 'Animation', 'Family']
+245429
+[(0.99999392, 'Drama'), (0.8687346, 'Comedy'), (0.79499781, 'Documentary')]
+[0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0 0]
+actual_genres ['Drama', 'History', 'Thriller']
+887912
+[(0.9999975, 'Drama'), (0.99173272, 'War'), (0.97637719, 'Music')]
+[0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+actual_genres ['Comedy', 'Crime']
+1337032
+[(0.99999905, 'Drama'), (0.99992776, 'Romance'), (0.99960107, 'Comedy')]
+[0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+actual_genres ['Comedy']
+1121964
+[(0.99998093, 'Drama'), (0.99991083, 'Animation'), (0.99956006, 'Comedy')]
+[0 0 0 0 1 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+actual_genres ['Adventure', 'Animation', 'Comedy']
+120623
+-------------
+-------------
+-------------
+-------------
+-------------
+[(1.0, 'Drama'), (0.99999928, 'Comedy'), (0.99990976, 'Family')]
+actual_genres ['Comedy', 'Romance']
+88848.jpg
+[(0.99999988, 'Drama'), (0.9980166, 'Documentary'), (0.97780561, 'Sport')]
+actual_genres ['Drama', 'Family']
+315273.jpg
+[(1.0, 'Drama'), (0.94875199, 'Comedy'), (0.86213493, 'Romance')]
+actual_genres ['Crime', 'Drama']
+62760.jpg
+[(1.0, 'Drama'), (0.99994922, 'Action'), (0.99994016, 'Comedy')]
+actual_genres ['Comedy', 'Drama', 'Music']
+3397754.jpg
+[(1.0, 'Fantasy'), (1.0, 'Drama'), (0.99999964, 'Comedy')]
+actual_genres ['Action', 'Fantasy', 'Horror']
+3007132.jpg
+[(0.99999249, 'Drama'), (0.97222036, 'Comedy'), (0.92613924, 'Romance')]
+actual_genres ['Adventure', 'Drama', 'War']
+50212.jpg
+[(0.99998415, 'Drama'), (0.99512249, 'Romance'), (0.90615761, 'Comedy')]
+actual_genres ['Drama', 'History', 'War']
+59776.jpg
+[(0.99999917, 'Drama'), (0.99947411, 'Romance'), (0.99677628, 'Comedy')]
+actual_genres ['Drama', 'Music']
+120577.jpg
+[(0.99990559, 'Drama'), (0.8248744, 'Comedy'), (0.67744106, 'Sport')]
+actual_genres ['Adventure', 'Horror', 'Thriller']
+83001.jpg Roar
+[(1.0, 'Drama'), (0.99774122, 'Mystery'), (0.99626082, 'Thriller')]
+actual_genres ['Action', 'Drama', 'Mystery']
+116213.jpg Eraser
+[(1.0, 'Drama'), (0.99957401, 'Romance'), (0.99051595, 'Comedy')]
+actual_genres ['Drama', 'Mystery', 'Thriller']
+1554929.jpg
+[(0.99995816, 'Drama'), (0.99698931, 'Comedy'), (0.9852314, 'Romance')]
+actual_genres ['Drama']
+58294.jpg
+[(0.99993861, 'Drama'), (0.99426728, 'Comedy'), (0.60754275, 'Music')]
+actual_genres ['Crime', 'Drama', 'Romance']
+37414.jpg
+[(1.0, 'Thriller'), (1.0, 'Horror'), (1.0, 'Drama')]
+actual_genres ['Comedy', 'Horror', 'Sci-Fi']
+92074.jpg
+[(0.99999547, 'Drama'), (0.99965608, 'Comedy'), (0.82206565, 'Sport')]
+actual_genres ['Action', 'Comedy', 'Crime']
+90660.jpg
+[(0.99999952, 'Drama'), (0.99833447, 'Horror'), (0.99787712, 'Thriller')]
+actual_genres ['Horror', 'Thriller']
+82527.jpg X-Ray
+[(0.99999976, 'Drama'), (0.99871945, 'Comedy'), (0.94427133, 'Crime')]
+actual_genres ['Crime', 'Thriller']
+356982.jpg
+[(1.0, 'Drama'), (0.99999619, 'Horror'), (0.99923253, 'Thriller')]
+actual_genres ['Documentary', 'Drama']
+4067162.jpg
+[(0.99999332, 'Drama'), (0.99517655, 'Comedy'), (0.39075926, 'Sport')]
+actual_genres ['Drama']
+1208664.jpg
+[(0.99999869, 'Drama'), (0.99874169, 'Comedy'), (0.99575019, 'Documentary')]
+actual_genres ['Drama']
+276216.jpg
+(7410, 30)

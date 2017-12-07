@@ -5,7 +5,7 @@ import os.path
 import numpy as np
 
 from scipy.misc import imread
-from random import shuffle
+import random
 
 DATA_LOCATION = os.path.join('data','download')
 
@@ -57,6 +57,7 @@ class MovieContainer():
         self.x_train_directors = -1
         self.x_test_images = -1
         self.x_test_actor_names = -1
+        self.x_test_id = []
         self.x_test_directors = -1
         self.y_test_labels = []
         self.x_test_filenames = []
@@ -160,7 +161,8 @@ class MovieContainer():
 
     def create_data_arrays(self,test_proportion=0.5):
         key_list = list(self.movies.keys())
-        shuffle(key_list)
+        random.seed(4)
+        random.shuffle(key_list)
         split_i = int(len(key_list)*test_proportion)
         test_list = key_list[0:split_i]
         train_list = key_list[split_i:]
@@ -186,6 +188,8 @@ class MovieContainer():
             self.x_test_directors[i] = self.movies[key].director
             self.y_test[i] = self.movies[key].catvec
             self.y_test_labels.append(self.movies[key].genres)
+            self.x_test_id.append(self.movies[key].id)
+            #print(self.movies[key].title, self.movies[key].id)
             i += 1
 
         self.x_train_images = np.zeros((len(train_list), im_size[0], im_size[1], im_size[2]), dtype=np.int8)
