@@ -33,6 +33,7 @@ class Movie():
         self.genres = csvline[4].split('|')
         self.poster_link = csvline[5]
         self.actors = csvline[9].split('|')
+        self.unique_directors = int(csvline[11])
         if len(self.actors) < 5:
             act_list_len = len(self.actors)
             for i in range(5-act_list_len):
@@ -57,8 +58,10 @@ class MovieContainer():
         self.x_train_directors = -1
         self.x_test_images = -1
         self.x_test_actor_names = -1
+        self.x_train_directors_id = []
         self.x_test_id = []
         self.x_test_directors = -1
+        self.x_test_directors_id = []
         self.y_test_labels = []
         self.x_test_filenames = []
         self.y_train = -1
@@ -189,8 +192,10 @@ class MovieContainer():
             self.y_test[i] = self.movies[key].catvec
             self.y_test_labels.append(self.movies[key].genres)
             self.x_test_id.append(self.movies[key].id)
-            #print(self.movies[key].title, self.movies[key].id)
+            if self.movies[key].unique_directors != 0:
+                self.x_train_directors_id.append(self.movies[key].unique_directors)
             i += 1
+        self.x_test_directors_id.append(0)
 
         self.x_train_images = np.zeros((len(train_list), im_size[0], im_size[1], im_size[2]), dtype=np.int8)
         self.x_train_actor_names = np.zeros((len(train_list),1,1, actor_size),dtype='|S50')
@@ -206,11 +211,13 @@ class MovieContainer():
             self.x_train_actor_names[i] = self.movies[key].actors
             self.x_train_directors[i] = self.movies[key].director
             self.y_train[i] = self.movies[key].catvec
+            if self.movies[key].unique_directors != 0:
+                self.x_test_directors_id.append(self.movies[key].unique_directors)
             i += 1
-
+        self.x_test_directors_id.append(0)
 
 # mc = MovieContainer()
-# mc.add_csv_file('data/MetaData2.csv')
+# mc.add_csv_file('data/MetaData3.csv')
 # print('added csv')
 # mc.remove_movies_without_posters()
 # print('removed without files')
@@ -220,3 +227,4 @@ class MovieContainer():
 # print('created cat vecs')
 # mc.create_data_arrays(test_proportion=0.2)
 # print('created data arrays')
+# print('x_train_directors_id',mc.x_train_directors_id)
