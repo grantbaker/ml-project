@@ -180,7 +180,7 @@ class INCEPTION:
         test CNN classifier and get accuracy
         :return: accuracy
         '''
-        acc = self.model.evaluate(self.test_x_images, self.test_y)
+        acc = self.model.evaluate([self.test_x_images, self.test_x_directors], self.test_y)
         return acc
 
 
@@ -279,7 +279,7 @@ if __name__ == '__main__':
     mc.create_data_arrays(test_proportion=0.2)
     print('created data arrays')
 
-    cnn = INCEPTION(mc.x_train_images, mc.x_train_actor_names, mc.x_train_directors_id, mc.y_train, mc.x_test_images, mc.x_test_actor_names, mc.x_test_directors_id, mc.y_test, epochs=1, batch_size=128)
+    cnn = INCEPTION(mc.x_train_images, mc.x_train_actor_names, mc.x_train_directors_id, mc.y_train, mc.x_test_images, mc.x_test_actor_names, mc.x_test_directors_id, mc.y_test, epochs=10, batch_size=128)
     cnn.train()
     acc = cnn.evaluate()
     print(acc)
