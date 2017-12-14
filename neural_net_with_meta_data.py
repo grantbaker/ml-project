@@ -13,6 +13,7 @@ from keras.layers import MaxPool2D
 from keras.layers import Flatten
 from keras.layers import BatchNormalization
 from keras.layers import Input
+from keras.layers import Embedding
 from keras.layers.core import Reshape
 
 # for f_score calculation
@@ -95,8 +96,8 @@ class INCEPTION:
         self.test_x_images = test_x_images
         self.train_x_actors = np.array(train_x_actors)
         self.test_x_actors = np.array(test_x_actors)
-        self.train_x_directors = np.array(train_x_directors)
-        self.test_x_directors = np.array(test_x_directors)
+        self.train_x_directors = train_x_directors
+        self.test_x_directors = test_x_directors
         self.train_y = train_y
         self.test_y = test_y
         cats = len(test_y[0])
@@ -121,16 +122,18 @@ class INCEPTION:
 
         inception_model = InceptionV3(input_tensor=input_tensor, weights='imagenet', include_top=False)
         x = inception_model.output
-        first_out = Flatten()(x)
-        actor_input = Input(shape=(57344))
-        director_input = Input(shape=(57344))
-        x = keras.layers.concatenate([first_out,actor_input,director_input])
-        x = GlobalAveragePooling2D()(x)
-        x = Dense(8192, activation='relu')(x)
+        first_out = GlobalAveragePooling2D()(x)
+        # actor_input = Input(shape=(57344))
+
+        director_input = Input(shape=(1,))
+        dir_embed = Embedding(output_dim=128, input_dim=6000, input_length=1)(director_input)
+        dir_embed = Flatten()(dir_embed)
+        x = keras.layers.concatenate([first_out,dir_embed])
+        x = Dense(4096, activation='relu')(x)
         x = Dropout(0.5)(x)
-        x = Dense(8192, activation='relu')(x)
+        x = Dense(4096, activation='relu')(x)
         genres = Dense(cats, activation='sigmoid')(x)
-        self.model = Model(inputs=[input_tensor,actor_input,director_input], outputs=genres)
+        self.model = Model(inputs=[input_tensor,director_input], outputs=genres)
 
         for layer in inception_model.layers[:249]:
             layer.trainable = False
@@ -166,11 +169,11 @@ class INCEPTION:
         # print(self.test_y.shape)
         # print("----------")
 
-        self.model.fit([self.train_x_images, self.train_x_actors,self.train_x_directors], self.train_y,
+        self.model.fit([self.train_x_images, self.train_x_directors], self.train_y,
           batch_size=self.batch_size,
           epochs=self.epochs,
           verbose=1,
-          validation_data=([self.test_x_images, self.test_x_actors,self.test_x_directors], self.test_y))
+          validation_data=([self.test_x_images, self.test_x_directors], self.test_y))
 
     def evaluate(self):
         '''
@@ -269,14 +272,14 @@ if __name__ == '__main__':
     print('added csv')
     mc.remove_movies_without_posters()
     print('removed without files')
-    mc.remove_different_size_images()
-    print('removed different sizes')
+    # mc.remove_different_size_images()
+    # print('removed different sizes')
     mc.create_cat_vecs()
     print('created cat vecs')
     mc.create_data_arrays(test_proportion=0.2)
     print('created data arrays')
 
-    cnn = INCEPTION(mc.x_train_images, mc.x_train_actor_names,mc.x_train_directors, mc.y_train, mc.x_test_images, mc.x_test_actor_names, mc.x_test_directors, mc.y_test, epochs=1, batch_size=128)
+    cnn = INCEPTION(mc.x_train_images, mc.x_train_actor_names, mc.x_train_directors_id, mc.y_train, mc.x_test_images, mc.x_test_actor_names, mc.x_test_directors_id, mc.y_test, epochs=1, batch_size=128)
     cnn.train()
     acc = cnn.evaluate()
     print(acc)

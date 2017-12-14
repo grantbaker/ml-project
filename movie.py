@@ -178,8 +178,13 @@ class MovieContainer():
         self.x_test_images = np.zeros((len(test_list), im_size[0], im_size[1], im_size[2]), dtype=np.int8)
         self.x_test_actor_names = np.zeros((len(test_list),1,1, actor_size),dtype='|S50')
         self.x_test_directors = np.zeros((len(test_list),1,1, 1),dtype='|S50')
+        self.x_test_directors_id = np.zeros(len(test_list))
+
         self.y_test = np.zeros((len(test_list), self.movies[test_list[0]].catvec.shape[0]), dtype=np.int8)
         i = 0
+
+        MAX_UNIQUE_DIRECTOR = -1;
+
         for key in test_list:
             if self.images_loaded:
                 self.x_test_images[i] = self.movies[key].matrix
@@ -192,15 +197,19 @@ class MovieContainer():
             self.y_test[i] = self.movies[key].catvec
             self.y_test_labels.append(self.movies[key].genres)
             self.x_test_id.append(self.movies[key].id)
-            if self.movies[key].unique_directors != 0:
-                self.x_train_directors_id.append(self.movies[key].unique_directors)
+            # if self.movies[key].unique_directors != 0:
+            self.x_test_directors_id[i] = self.movies[key].unique_directors
+            if self.movies[key].unique_directors > MAX_UNIQUE_DIRECTOR:
+                MAX_UNIQUE_DIRECTOR = self.movies[key].unique_directors
             i += 1
-        self.x_test_directors_id.append(0)
+        # self.x_test_directors_id.append(0)
 
         self.x_train_images = np.zeros((len(train_list), im_size[0], im_size[1], im_size[2]), dtype=np.int8)
         self.x_train_actor_names = np.zeros((len(train_list),1,1, actor_size),dtype='|S50')
         self.x_train_directors = np.zeros((len(train_list),1,1, 1),dtype='|S50')
+        self.x_train_directors_id = np.zeros((len(train_list)))
         self.y_train = np.zeros((len(train_list), self.movies[train_list[0]].catvec.shape[0]), dtype=np.int8)
+
         i = 0
         for key in train_list:
             if self.images_loaded:
@@ -211,10 +220,13 @@ class MovieContainer():
             self.x_train_actor_names[i] = self.movies[key].actors
             self.x_train_directors[i] = self.movies[key].director
             self.y_train[i] = self.movies[key].catvec
-            if self.movies[key].unique_directors != 0:
-                self.x_test_directors_id.append(self.movies[key].unique_directors)
+            # if self.movies[key].unique_directors != 0:
+            self.x_train_directors_id[i] = self.movies[key].unique_directors
             i += 1
-        self.x_test_directors_id.append(0)
+        # self.x_test_directors_id.append(0)
+
+        print("______________________________")
+        print('MAX UNIQUE DIRECTOR = ', MAX_UNIQUE_DIRECTOR)
 
 # mc = MovieContainer()
 # mc.add_csv_file('data/MetaData3.csv')
