@@ -126,7 +126,7 @@ class INCEPTION:
         # actor_input = Input(shape=(57344))
 
         director_input = Input(shape=(1,))
-        dir_embed = Embedding(output_dim=128, input_dim=6000, input_length=1)(director_input)
+        dir_embed = Embedding(output_dim=512, input_dim=6000, input_length=1)(director_input)
         dir_embed = Flatten()(dir_embed)
         x = keras.layers.concatenate([first_out,dir_embed])
         x = Dense(4096, activation='relu')(x)
@@ -279,7 +279,7 @@ if __name__ == '__main__':
     mc.create_data_arrays(test_proportion=0.2)
     print('created data arrays')
 
-    cnn = INCEPTION(mc.x_train_images, mc.x_train_actor_names, mc.x_train_directors_id, mc.y_train, mc.x_test_images, mc.x_test_actor_names, mc.x_test_directors_id, mc.y_test, epochs=10, batch_size=128)
+    cnn = INCEPTION(mc.x_train_images, mc.x_train_actor_names, mc.x_train_directors_id, mc.y_train, mc.x_test_images, mc.x_test_actor_names, mc.x_test_directors_id, mc.y_test, epochs=50, batch_size=128)
     cnn.train()
     acc = cnn.evaluate()
     print(acc)
