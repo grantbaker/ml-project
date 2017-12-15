@@ -104,21 +104,9 @@ class INCEPTION:
         imsize = np.shape(train_x_images[0])
         actor_size = np.shape(train_x_actors[0])
         director_size = np.shape(train_x_directors[0])
-        print(train_x_images[0])
-        print("imsize",imsize)
-        print(train_x_actors[0])
-        print("actor_size", actor_size)
-        print(train_x_directors[0])
-        print("director_size", director_size)
 
         input_tensor = Input(shape=(imsize[0],imsize[1],imsize[2],))
 
-        print("----------")
-        print(type(self.train_x_images))
-        print(type(self.train_x_actors))
-        print(type(self.train_x_directors))
-        print(type(self.train_y))
-        print("----------")
 
         inception_model = InceptionV3(input_tensor=input_tensor, weights='imagenet', include_top=False)
         x = inception_model.output
@@ -154,20 +142,6 @@ class INCEPTION:
 	# FAILURE: in size or shape of validatio_data=...
         # Error in input two, expects 4 dimensions but gets 2
         # TODO: Check size of all inputs for debugging
-
-        print("----------")
-        print(self.train_x_images.shape)
-        print(self.train_x_actors.shape)
-        print(self.train_x_actors[0])
-        print(self.train_x_directors.shape)
-        print(self.train_x_directors[0])
-        print(self.train_y.shape)
-        print("----------")
-        # print(self.test_x_images.shape)
-        # print(self.test_x_actors.shape)
-        # print(self.test_x_directors.shape)
-        # print(self.test_y.shape)
-        # print("----------")
 
         self.model.fit([self.train_x_images, self.train_x_directors], self.train_y,
           batch_size=self.batch_size,
@@ -279,7 +253,7 @@ if __name__ == '__main__':
     mc.create_data_arrays(test_proportion=0.2)
     print('created data arrays')
 
-    cnn = INCEPTION(mc.x_train_images, mc.x_train_actor_names, mc.x_train_directors_id, mc.y_train, mc.x_test_images, mc.x_test_actor_names, mc.x_test_directors_id, mc.y_test, epochs=10, batch_size=128)
+    cnn = INCEPTION(mc.x_train_images, mc.x_train_actor_names, mc.x_train_directors_id, mc.y_train, mc.x_test_images, mc.x_test_actor_names, mc.x_test_directors_id, mc.y_test, epochs=20, batch_size=128)
     cnn.train()
     acc = cnn.evaluate()
     print(acc)
